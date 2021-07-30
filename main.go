@@ -4,7 +4,7 @@ import (
 	"log"
 	"os"
 
-	"github.com/programmfabrik/dv/dv"
+	dv "github.com/programmfabrik/dv/lib"
 
 	"github.com/urfave/cli"
 )
@@ -34,7 +34,7 @@ func main() {
 				dv.Server(c)
 				// this returns on CTRL-C
 			} else {
-				dv.Send(c)
+				dv.SendReader(c, os.Stdin)
 			}
 			return nil
 		},

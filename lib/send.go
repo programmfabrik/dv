@@ -16,19 +16,23 @@ import (
 	"github.com/urfave/cli"
 )
 
-func Send(c *cli.Context) error {
+func SendReader(c *cli.Context, readFrom io.Reader) error {
 	// read data from stdin
-	mimeType, recycleReader, err := recycleReader(os.Stdin)
+	mimeType, recycleReader, err := RecycleReader(readFrom)
 	if err != nil {
 		return err
 	}
 	fmt.Fprintf(os.Stderr, "Sending %q...", mimeType)
 	resp, err := http.Post(c.String("url")+"/data", mimeType, recycleReader)
 	if err != nil {
-		log.Print("post:", err.Error())
-	} else if resp.StatusCode != http.StatusOK {
+		fmt.Fprintf(os.Stderr, "post: %s\n", err.Error())
+		return err
+	}
+	defer resp.Body.Close()
+	if resp.StatusCode != http.StatusOK {
 		msg, _ := ioutil.ReadAll(resp.Body)
-		log.Print("post:", resp.Status, string(msg))
+		fmt.Fprintf(os.Stderr, "post: %s %s\n", resp.Status, string(msg))
+		return nil
 	}
 	fmt.Fprintf(os.Stderr, "Data sent\n")
 	return nil
@@ -36,7 +40,7 @@ func Send(c *cli.Context) error {
 
 // recycleReader returns the MIME type of input and a new reader
 // containing the whole data from input.
-func recycleReader(input io.Reader) (mimeType string, recycled io.Reader, err error) {
+func RecycleReader(input io.Reader) (mimeType string, recycled io.Reader, err error) {
 	// header will store the bytes mimetype uses for detection.
 	header := bytes.NewBuffer(nil)
 
@@ -51,11 +55,15 @@ func recycleReader(input io.Reader) (mimeType string, recycled io.Reader, err er
 }
 
 func data(w http.ResponseWriter, r *http.Request) {
+	println("reading data...")
+
 	body, err := ioutil.ReadAll(r.Body)
 	if err != nil {
 		http.Error(w, err.Error(), http.StatusInternalServerError)
 		return
 	}
+
+	println("read", len(body), len(recvs), "receivers")
 
 	dead := []*Receiver{}
 

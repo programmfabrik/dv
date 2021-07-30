@@ -22,5 +22,15 @@ http://localhost:10000
 # curl source.com/some.json | dv
 # ls | dv
 ```
+### To debug data from your program
+
+```go
+dv := sender.NewSender(sender.DefaultOpts)
+dv.SendData(map[string]interface{}{"This data": "Will be send"})
+```
+
+### Example session
 
 ![Example Session](teaser.png)
+
+
