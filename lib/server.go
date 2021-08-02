@@ -1,6 +1,8 @@
 package dv
 
 import (
+	"embed"
+	"io/fs"
 	"log"
 	"net/http"
 	"time"
@@ -65,6 +67,9 @@ func setFileHeader(h http.Handler) http.Handler {
 	})
 }
 
+//go:embed web/*
+var webFiles embed.FS
+
 func Server(c *cli.Context) error {
 	r := mux.NewRouter()
 
@@ -72,10 +77,21 @@ func Server(c *cli.Context) error {
 	r.HandleFunc("/stream", stream)
 	r.HandleFunc("/data", data)
 
-	// This will serve files under http://localhost:8000/static/<filename>
 	fr := r.PathPrefix("/").Subrouter()
 	fr.Use(setFileHeader)
-	fr.PathPrefix("").Handler(http.FileServer(http.Dir("web")))
+
+	devMode := true // Turn on during development for faster html/js/css reloads
+
+	if devMode {
+		// This will serve files under http://localhost:8000/static/<filename>
+		fr.PathPrefix("").Handler(http.FileServer(http.Dir("lib/web")))
+	} else {
+		fssub, err := fs.Sub(webFiles, "web")
+		if err != nil {
+			log.Fatal(err)
+		}
+		fr.PathPrefix("").Handler(http.FileServer(http.FS(fssub)))
+	}
 
 	addr := c.String("addr")
 

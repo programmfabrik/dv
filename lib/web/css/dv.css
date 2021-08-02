@@ -20,6 +20,19 @@ code.json {
     margin-top: 20px;
 }
 
+table.csv {
+    background: #000;
+    color: #8fe4a9;
+    font-family: monospace;
+    border-collapse: collapse;
+    margin-top: 20px;
+}
+
+table.csv > tbody > tr > td {
+    padding: 4px 6px;
+}
 
 
-
+table.csv > tbody > tr:nth-child(even)  {
+    background: #3a3a3a;
+}
