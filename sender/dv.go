@@ -22,10 +22,20 @@ var DefaultOpts = SenderOpts{
 	URL: "http://localhost:10000",
 }
 
+var defaultSender *Sender
+
+func init() {
+	defaultSender = NewSender(DefaultOpts)
+}
+
 func NewSender(opts SenderOpts) (s *Sender) {
 	s = &Sender{opts: opts}
 	s.SendData("New sender initialized")
 	return s
+}
+
+func SendData(data interface{}) (err error) {
+	return defaultSender.SendData(data)
 }
 
 func (s *Sender) SendData(data interface{}) (err error) {
