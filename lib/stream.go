@@ -4,6 +4,7 @@ import (
 	"encoding/json"
 	"log"
 	"net/http"
+	"sync"
 
 	"github.com/google/uuid"
 	"github.com/gorilla/websocket"
@@ -19,6 +20,7 @@ type receiverID string
 type Receiver struct {
 	id   receiverID
 	conn *websocket.Conn
+	mtx  sync.Mutex
 }
 
 func newReceiver(conn *websocket.Conn) (recv *Receiver) {
@@ -27,6 +29,12 @@ func newReceiver(conn *websocket.Conn) (recv *Receiver) {
 		conn: conn,
 	}
 	return recv
+}
+
+func (recv *Receiver) WriteMessage(messageType int, data []byte) error {
+	recv.mtx.Lock()
+	defer recv.mtx.Unlock()
+	return recv.conn.WriteMessage(messageType, data)
 }
 
 func (recv *Receiver) Close() {

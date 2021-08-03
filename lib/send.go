@@ -81,7 +81,7 @@ func data(w http.ResponseWriter, r *http.Request) {
 				return
 			}
 
-			err = recv.conn.WriteMessage(websocket.TextMessage, bs)
+			err = recv.WriteMessage(websocket.TextMessage, bs)
 			if err != nil {
 				// recv is dead
 				log.Print("send header:", err.Error())
@@ -89,7 +89,7 @@ func data(w http.ResponseWriter, r *http.Request) {
 				return
 			}
 
-			err = recv.conn.WriteMessage(websocket.BinaryMessage, body)
+			err = recv.WriteMessage(websocket.BinaryMessage, body)
 			if err != nil {
 				// recv is dead
 				log.Print("send body:", err.Error())
