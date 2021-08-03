@@ -5,6 +5,7 @@ import (
 	"io/fs"
 	"log"
 	"net/http"
+	"os"
 	"time"
 
 	"github.com/gorilla/mux"
@@ -80,10 +81,9 @@ func Server(c *cli.Context) error {
 	fr := r.PathPrefix("/").Subrouter()
 	fr.Use(setFileHeader)
 
-	devMode := true // Turn on during development for faster html/js/css reloads
-
-	if devMode {
-		// This will serve files under http://localhost:8000/static/<filename>
+	_, err := os.Stat("lib/web/dv.html")
+	if err == nil {
+		// file exists, local serve
 		fr.PathPrefix("").Handler(http.FileServer(http.Dir("lib/web")))
 	} else {
 		fssub, err := fs.Sub(webFiles, "web")
