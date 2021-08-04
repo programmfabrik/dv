@@ -18,7 +18,7 @@ import (
 
 func SendReader(c *cli.Context, readFrom io.Reader) error {
 	// read data from stdin
-	mimeType, recycleReader, err := RecycleReader(readFrom)
+	mimeType, recycleReader, err := recycleReader(readFrom)
 	if err != nil {
 		return err
 	}
@@ -40,7 +40,7 @@ func SendReader(c *cli.Context, readFrom io.Reader) error {
 
 // recycleReader returns the MIME type of input and a new reader
 // containing the whole data from input.
-func RecycleReader(input io.Reader) (mimeType string, recycled io.Reader, err error) {
+func recycleReader(input io.Reader) (mimeType string, recycled io.Reader, err error) {
 	// header will store the bytes mimetype uses for detection.
 	header := bytes.NewBuffer(nil)
 
@@ -65,12 +65,12 @@ func data(w http.ResponseWriter, r *http.Request) {
 
 	println("read", len(body), len(recvs), "receivers")
 
-	dead := []*Receiver{}
+	dead := []*receiver{}
 
 	wg := sync.WaitGroup{}
 	for _, recv := range recvs {
 		wg.Add(1)
-		go func(recv *Receiver) {
+		go func(recv *receiver) {
 			defer wg.Done()
 
 			// header is sent as json
@@ -81,7 +81,7 @@ func data(w http.ResponseWriter, r *http.Request) {
 				return
 			}
 
-			err = recv.WriteMessage(websocket.TextMessage, bs)
+			err = recv.writeMessage(websocket.TextMessage, bs)
 			if err != nil {
 				// recv is dead
 				log.Print("send header:", err.Error())
@@ -89,7 +89,7 @@ func data(w http.ResponseWriter, r *http.Request) {
 				return
 			}
 
-			err = recv.WriteMessage(websocket.BinaryMessage, body)
+			err = recv.writeMessage(websocket.BinaryMessage, body)
 			if err != nil {
 				// recv is dead
 				log.Print("send body:", err.Error())
@@ -101,6 +101,6 @@ func data(w http.ResponseWriter, r *http.Request) {
 	}
 
 	for _, recv := range dead {
-		recv.Close()
+		recv.close()
 	}
 }

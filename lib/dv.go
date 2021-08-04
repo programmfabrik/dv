@@ -1,4 +1,4 @@
-package sender
+package dv
 
 import (
 	"bytes"
@@ -10,35 +10,35 @@ import (
 	"reflect"
 )
 
-type Sender struct {
-	opts SenderOpts
+type Logger struct {
+	opts LoggerOpts
 }
 
-type SenderOpts struct {
+type LoggerOpts struct {
 	URL string
 }
 
-var DefaultOpts = SenderOpts{
+var DefaultOpts = LoggerOpts{
 	URL: "http://localhost:10000",
 }
 
-var defaultSender *Sender
+var defaultLogger *Logger
 
 func init() {
-	defaultSender = NewSender(DefaultOpts)
+	defaultLogger = NewLogger(DefaultOpts)
 }
 
-func NewSender(opts SenderOpts) (s *Sender) {
-	s = &Sender{opts: opts}
-	s.SendData("New sender initialized")
+func NewLogger(opts LoggerOpts) (s *Logger) {
+	s = &Logger{opts: opts}
+	s.Log("New logger initialized")
 	return s
 }
 
-func SendData(data interface{}) (err error) {
-	return defaultSender.SendData(data)
+func Log(data interface{}) (err error) {
+	return defaultLogger.Log(data)
 }
 
-func (s *Sender) SendData(data interface{}) (err error) {
+func (s *Logger) Log(data interface{}) (err error) {
 
 	rv := reflect.ValueOf(data)
 	println("rt", rv.String(), s.opts.URL)

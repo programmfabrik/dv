@@ -10,48 +10,48 @@ import (
 	"github.com/gorilla/websocket"
 )
 
-type Message struct {
+type message struct {
 	Header http.Header
 	Body   json.RawMessage
 }
 
 type receiverID string
 
-type Receiver struct {
+type receiver struct {
 	id   receiverID
 	conn *websocket.Conn
 	mtx  sync.Mutex
 }
 
-func newReceiver(conn *websocket.Conn) (recv *Receiver) {
-	recv = &Receiver{
+func newReceiver(conn *websocket.Conn) (recv *receiver) {
+	recv = &receiver{
 		id:   receiverID(uuid.New().String()),
 		conn: conn,
 	}
 	return recv
 }
 
-func (recv *Receiver) WriteMessage(messageType int, data []byte) error {
+func (recv *receiver) writeMessage(messageType int, data []byte) error {
 	recv.mtx.Lock()
 	defer recv.mtx.Unlock()
 	return recv.conn.WriteMessage(messageType, data)
 }
 
-func (recv *Receiver) Close() {
+func (recv *receiver) close() {
 	delete(recvs, recv.id)
 	log.Printf("Receiver %q closed\n", recv.id)
 }
 
-func (m Message) String() string {
+func (m message) String() string {
 	return string(m.Body)
 }
 
 // receiver regisry
-var recvs = map[receiverID]*Receiver{}
+var recvs = map[receiverID]*receiver{}
 
 // newReceiver returns a channel to receive streamed data
 // from. Each websocket
-func registerReceiver(wconn *websocket.Conn) *Receiver {
+func registerReceiver(wconn *websocket.Conn) *receiver {
 	recv := newReceiver(wconn)
 	recvs[recv.id] = recv
 	log.Printf("Receiver %q opened\n", recv.id)

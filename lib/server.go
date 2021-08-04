@@ -58,7 +58,7 @@ func stream(w http.ResponseWriter, r *http.Request) {
 		log.Printf("recv: %d %s", mt, message)
 	}
 	log.Printf("closing socket %q\n", r.RemoteAddr)
-	recv.Close()
+	recv.close()
 }
 
 func setFileHeader(h http.Handler) http.Handler {
