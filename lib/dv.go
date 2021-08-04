@@ -41,7 +41,6 @@ func Log(data interface{}) (err error) {
 func (s *Logger) Log(data interface{}) (err error) {
 
 	rv := reflect.ValueOf(data)
-	println("rt", rv.String(), s.opts.URL)
 
 	var (
 		dr *bytes.Buffer
@@ -62,7 +61,7 @@ func (s *Logger) Log(data interface{}) (err error) {
 		dr = bytes.NewBuffer(bs)
 	}
 
-	fmt.Fprintf(os.Stderr, "Sending %q... %d bytes to %s", ct, dr.Len(), s.opts.URL)
+	fmt.Fprintf(os.Stderr, "dv: sending %q %d bytes to %s...", ct, dr.Len(), s.opts.URL)
 	resp, err := http.Post(s.opts.URL+"/data", ct, dr)
 	if err != nil {
 		fmt.Fprintf(os.Stderr, "post: %s\n", err.Error())
@@ -74,6 +73,6 @@ func (s *Logger) Log(data interface{}) (err error) {
 		fmt.Fprintf(os.Stderr, "post: %s %s\n", resp.Status, string(msg))
 		return nil
 	}
-	fmt.Fprintf(os.Stderr, "Data sent\n")
+	fmt.Fprint(os.Stderr, " sent\n")
 	return nil
 }
